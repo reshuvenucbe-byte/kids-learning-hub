@@ -6,7 +6,7 @@ const REGION = process.env.AWS_REGION || 'us-east-1';
 
 const s3Client = new S3Client({ region: REGION });
 
-export async function GET(request) {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type');
   const index = searchParams.get('index');
