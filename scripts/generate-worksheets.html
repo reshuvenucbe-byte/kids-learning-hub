@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Worksheet Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px 20px; margin: 5px; font-size: 16px; cursor: pointer; }
+        #status { margin-top: 20px; padding: 10px; background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <h1>High-Quality Worksheet Generator</h1>
+    <button onclick="generateAlphabetWorksheets()">Generate Alphabet (200)</button>
+    <button onclick="generateNumberWorksheets()">Generate Numbers (200)</button>
+    <button onclick="generateColorWorksheets()">Generate Colors (150)</button>
+    <button onclick="generateShapeWorksheets()">Generate Shapes (150)</button>
+    <button onclick="generateAnimalWorksheets()">Generate Animals (200)</button>
+    <button onclick="generateWordWorksheets()">Generate Words (200)</button>
+    <div id="status"></div>
+
+    <script>
+        const updateStatus = (msg) => {
+            document.getElementById('status').innerHTML += msg + '<br>';
+        };
+
+        // 4-line ruled paper (standard handwriting lines)
+        const draw4LineRuledPaper = (ctx, startY, lineHeight = 80) => {
+            const margin = 100;
+            const width = 800 - margin * 2;
+            
+            // Top line (blue)
+            ctx.strokeStyle = '#3B82F6';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(margin, startY);
+            ctx.lineTo(margin + width, startY);
+            ctx.stroke();
+            
+            // Dotted middle line (red)
+            ctx.strokeStyle = '#EF4444';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(margin, startY + lineHeight / 2);
+            ctx.lineTo(margin + width, startY + lineHeight / 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Bottom line (blue)
+            ctx.strokeStyle = '#3B82F6';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(margin, startY + lineHeight);
+            ctx.lineTo(margin + width, startY + lineHeight);
+            ctx.stroke();
+            
+            // Baseline (green - where letters sit)
+            ctx.strokeStyle = '#10B981';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(margin, startY + lineHeight * 0.75);
+            ctx.lineTo(margin + width, startY + lineHeight * 0.75);
+            ctx.stroke();
+        };
+
+        const createCanvas = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 800;
+            canvas.height = 1100;
+            return canvas;
+        };
+
+        const drawHeader = (ctx, title, subtitle) => {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, 800, 1100);
+            
+            ctx.fillStyle = '#6366F1';
+            ctx.font = 'bold 36px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(title, 400, 50);
+            
+            ctx.fillStyle = '#9CA3AF';
+            ctx.font = '18px Arial';
+            ctx.fillText(subtitle, 400, 80);
+        };
+
+        const drawFooter = (ctx) => {
+            ctx.fillStyle = '#9CA3AF';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Kids Learning Hub - www.kidslearninghub.com', 400, 1070);
+        };
+
+        const downloadCanvas = (canvas, filename) => {
+            return new Promise((resolve) => {
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    setTimeout(resolve, 200);
+                });
+            });
+        };
+
+        // ALPHABET WORKSHEETS
+        const generateAlphabetWorksheets = async () => {
+            updateStatus('Generating Alphabet worksheets...');
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            
+            for (let i = 0; i < 200; i++) {
+                const canvas = createCanvas();
+                const ctx = canvas.getContext('2d');
+                const letter = letters[i % 26];
+                const isUppercase = i < 100;
+                const displayLetter = isUppercase ? letter : letter.toLowerCase();
+                
+                drawHeader(ctx, `Letter ${displayLetter} Practice`, 
+                    `Trace and write the letter ${displayLetter}`);
+                
+                // Example letter (large)
+                ctx.fillStyle = '#6366F1';
+                ctx.font = 'bold 120px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(displayLetter, 120, 180);
+                
+                // Tracing examples (3 dotted letters)
+                ctx.strokeStyle = '#D1D5DB';
+                ctx.lineWidth = 3;
+                ctx.font = 'bold 80px Arial';
+                ctx.setLineDash([8, 8]);
+                for (let j = 0; j < 3; j++) {
+                    ctx.strokeText(displayLetter, 300 + j * 120, 180);
+                }
+                ctx.setLineDash([]);
+                
+                // Practice lines with 4-line ruled paper
+                for (let row = 0; row < 8; row++) {
+                    const y = 250 + row * 100;
+                    draw4LineRuledPaper(ctx, y, 80);
+                    
+                    // Guide letter at start of first few lines
+                    if (row < 3) {
+                        ctx.fillStyle = '#E5E7EB';
+                        ctx.font = 'bold 60px Arial';
+                        ctx.fillText(displayLetter, 110, y + 60);
+                    }
+                }
+                
+                drawFooter(ctx);
+                await downloadCanvas(canvas, `alphabet-${i + 1}-${displayLetter}.png`);
+                
+                if ((i + 1) % 10 === 0) updateStatus(`Generated ${i + 1}/200 alphabet worksheets`);
+            }
+            updateStatus('✅ Alphabet worksheets complete!');
+        };
+
+        // NUMBER WORKSHEETS
+        const generateNumberWorksheets = async () => {
+            updateStatus('Generating Number worksheets...');
+            
+            for (let i = 0; i < 200; i++) {
+                const canvas = createCanvas();
+                const ctx = canvas.getContext('2d');
+                const number = (i % 100) + 1;
+                
+                drawHeader(ctx, `Number ${number} Practice`, 
+                    `Trace and write the number ${number}`);
+                
+                // Example number (large)
+                ctx.fillStyle = '#6366F1';
+                ctx.font = 'bold 120px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(number.toString(), 120, 180);
+                
+                // Counting dots
+                ctx.fillStyle = '#F59E0B';
+                const dotsPerRow = 10;
+                for (let d = 0; d < Math.min(number, 20); d++) {
+                    const dx = 300 + (d % dotsPerRow) * 30;
+                    const dy = 140 + Math.floor(d / dotsPerRow) * 30;
+                    ctx.beginPath();
+                    ctx.arc(dx, dy, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Tracing examples
+                ctx.strokeStyle = '#D1D5DB';
+                ctx.lineWidth = 3;
+                ctx.font = 'bold 80px Arial';
+                ctx.setLineDash([8, 8]);
+                for (let j = 0; j < 3; j++) {
+                    ctx.strokeText(number.toString(), 300 + j * 100, 240);
+                }
+                ctx.setLineDash([]);
+                
+                // Practice lines
+                for (let row = 0; row < 7; row++) {
+                    const y = 300 + row * 100;
+                    draw4LineRuledPaper(ctx, y, 80);
+                    
+                    if (row < 2) {
+                        ctx.fillStyle = '#E5E7EB';
+                        ctx.font = 'bold 60px Arial';
+                        ctx.fillText(number.toString(), 110, y + 60);
+                    }
+                }
+                
+                drawFooter(ctx);
+                await downloadCanvas(canvas, `numbers-${i + 1}-num${number}.png`);
+                
+                if ((i + 1) % 10 === 0) updateStatus(`Generated ${i + 1}/200 number worksheets`);
+            }
+            updateStatus('✅ Number worksheets complete!');
+        };
+
+        // COLOR WORKSHEETS
+        const generateColorWorksheets = async () => {
+            updateStatus('Generating Color worksheets...');
+            const colors = [
+                {name: 'Red', hex: '#EF4444'},
+                {name: 'Blue', hex: '#3B82F6'},
+                {name: 'Green', hex: '#10B981'},
+                {name: 'Yellow', hex: '#F59E0B'},
+                {name: 'Orange', hex: '#F97316'},
+                {name: 'Purple', hex: '#A855F7'},
+                {name: 'Pink', hex: '#EC4899'},
+                {name: 'Brown', hex: '#92400E'},
+                {name: 'Black', hex: '#000000'},
+                {name: 'White', hex: '#FFFFFF'}
+            ];
+            
+            for (let i = 0; i < 150; i++) {
+                const canvas = createCanvas();
+                const ctx = canvas.getContext('2d');
+                const color = colors[i % colors.length];
+                
+                drawHeader(ctx, `Color: ${color.name}`, 
+                    `Trace and write the color name`);
+                
+                // Color swatch
+                ctx.fillStyle = color.hex;
+                ctx.fillRect(100, 110, 150, 150);
+                if (color.name === 'White') {
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(100, 110, 150, 150);
+                }
+                
+                // Color name example
+                ctx.fillStyle = color.hex === '#FFFFFF' ? '#000000' : color.hex;
+                ctx.font = 'bold 60px Arial';
+                ctx.fillText(color.name, 280, 200);
+                
+                // Practice lines
+                for (let row = 0; row < 8; row++) {
+                    const y = 300 + row * 95;
+                    draw4LineRuledPaper(ctx, y, 75);
+                    
+                    if (row < 2) {
+                        ctx.fillStyle = '#E5E7EB';
+                        ctx.font = '50px Arial';
+                        ctx.fillText(color.name, 110, y + 55);
+                    }
+                }
+                
+                drawFooter(ctx);
+                await downloadCanvas(canvas, `colors-${i + 1}-${color.name.toLowerCase()}.png`);
+                
+                if ((i + 1) % 10 === 0) updateStatus(`Generated ${i + 1}/150 color worksheets`);
+            }
+            updateStatus('✅ Color worksheets complete!');
+        };
+
+        // SHAPE WORKSHEETS
+        const generateShapeWorksheets = async () => {
+            updateStatus('Generating Shape worksheets...');
+            const shapes = ['Circle', 'Square', 'Triangle', 'Rectangle', 'Star', 'Heart', 'Diamond', 'Oval'];
+            
+            for (let i = 0; i < 150; i++) {
+                const canvas = createCanvas();
+                const ctx = canvas.getContext('2d');
+                const shape = shapes[i % shapes.length];
+                
+                drawHeader(ctx, `Shape: ${shape}`, 
+                    `Trace the shape and write its name`);
+                
+                // Draw shape
+                ctx.strokeStyle = '#6366F1';
+                ctx.fillStyle = '#E0E7FF';
+                ctx.lineWidth = 4;
+                
+                const cx = 175, cy = 180, size = 80;
+                ctx.beginPath();
+                if (shape === 'Circle') {
+                    ctx.arc(cx, cy, size, 0, Math.PI * 2);
+                } else if (shape === 'Square') {
+                    ctx.rect(cx - size, cy - size, size * 2, size * 2);
+                } else if (shape === 'Triangle') {
+                    ctx.moveTo(cx, cy - size);
+                    ctx.lineTo(cx + size, cy + size);
+                    ctx.lineTo(cx - size, cy + size);
+                    ctx.closePath();
+                } else if (shape === 'Rectangle') {
+                    ctx.rect(cx - size * 1.2, cy - size * 0.7, size * 2.4, size * 1.4);
+                }
+                ctx.fill();
+                ctx.stroke();
+                
+                // Shape name
+                ctx.fillStyle = '#6366F1';
+                ctx.font = 'bold 60px Arial';
+                ctx.fillText(shape, 350, 200);
+                
+                // Practice lines
+                for (let row = 0; row < 8; row++) {
+                    const y = 280 + row * 95;
+                    draw4LineRuledPaper(ctx, y, 75);
+                    
+                    if (row < 2) {
+                        ctx.fillStyle = '#E5E7EB';
+                        ctx.font = '50px Arial';
+                        ctx.fillText(shape, 110, y + 55);
+                    }
+                }
+                
+                drawFooter(ctx);
+                await downloadCanvas(canvas, `shapes-${i + 1}-${shape.toLowerCase()}.png`);
+                
+                if ((i + 1) % 10 === 0) updateStatus(`Generated ${i + 1}/150 shape worksheets`);
+            }
+            updateStatus('✅ Shape worksheets complete!');
+        };
+
+        // ANIMAL WORKSHEETS
+        const generateAnimalWorksheets = async () => {
+            updateStatus('Generating Animal worksheets...');
+            const animals = ['Cat', 'Dog', 'Bird', 'Fish', 'Lion', 'Tiger', 'Bear', 'Elephant', 
+                           'Monkey', 'Rabbit', 'Horse', 'Cow', 'Pig', 'Sheep', 'Duck', 'Frog',
+                           'Snake', 'Turtle', 'Butterfly', 'Bee'];
+            
+            for (let i = 0; i < 200; i++) {
+                const canvas = createCanvas();
+                const ctx = canvas.getContext('2d');
+                const animal = animals[i % animals.length];
+                
+                drawHeader(ctx, `Animal: ${animal}`, 
+                    `Trace and write the animal name`);
+                
+                // Animal name example
+                ctx.fillStyle = '#6366F1';
+                ctx.font = 'bold 70px Arial';
+                ctx.fillText(animal, 120, 180);
+                
+                // Practice lines
+                for (let row = 0; row < 9; row++) {
+                    const y = 240 + row * 90;
+                    draw4LineRuledPaper(ctx, y, 70);
+                    
+                    if (row < 2) {
+                        ctx.fillStyle = '#E5E7EB';
+                        ctx.font = '50px Arial';
+                        ctx.fillText(animal, 110, y + 52);
+                    }
+                }
+                
+                drawFooter(ctx);
+                await downloadCanvas(canvas, `animals-${i + 1}-${animal.toLowerCase()}.png`);
+                
+                if ((i + 1) % 10 === 0) updateStatus(`Generated ${i + 1}/200 animal worksheets`);
+            }
+            updateStatus('✅ Animal worksheets complete!');
+        };
+
+        // WORD WORKSHEETS
+        const generateWordWorksheets = async () => {
+            updateStatus('Generating Word worksheets...');
+            const words = ['cat', 'dog', 'bat', 'hat', 'mat', 'rat', 'sun', 'run', 'fun', 'bun',
+                          'pen', 'hen', 'ten', 'den', 'cup', 'pup', 'top', 'hop', 'mop', 'pop',
+                          'bed', 'red', 'led', 'fed', 'big', 'dig', 'pig', 'wig', 'box', 'fox'];
+            
+            for (let i = 0; i < 200; i++) {
+                const canvas = createCanvas();
+                const ctx = canvas.getContext('2d');
+                const word = words[i % words.length];
+                
+                drawHeader(ctx, `Word: ${word}`, 
+                    `Trace and write the word`);
+                
+                // Word example
+                ctx.fillStyle = '#6366F1';
+                ctx.font = 'bold 80px Arial';
+                ctx.fillText(word, 120, 180);
+                
+                // Dotted tracing
+                ctx.strokeStyle = '#D1D5DB';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([8, 8]);
+                for (let j = 0; j < 3; j++) {
+                    ctx.strokeText(word, 350 + j * 120, 180);
+                }
+                ctx.setLineDash([]);
+                
+                // Practice lines
+                for (let row = 0; row < 9; row++) {
+                    const y = 250 + row * 90;
+                    draw4LineRuledPaper(ctx, y, 70);
+                    
+                    if (row < 3) {
+                        ctx.fillStyle = '#E5E7EB';
+                        ctx.font = '50px Arial';
+                        ctx.fillText(word, 110, y + 52);
+                    }
+                }
+                
+                drawFooter(ctx);
+                await downloadCanvas(canvas, `words-${i + 1}-${word}.png`);
+                
+                if ((i + 1) % 10 === 0) updateStatus(`Generated ${i + 1}/200 word worksheets`);
+            }
+            updateStatus('✅ Word worksheets complete!');
+        };
+    </script>
+</body>
+</html>
